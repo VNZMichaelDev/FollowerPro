@@ -18,73 +18,33 @@ const dbConfig = {
     keepAliveInitialDelay: 0
 };
 
-// Pool de conexiones
+// Pool de conexiones (singleton para Vercel)
 let pool;
 
+const getPool = () => {
+    if (!pool) {
+        pool = mysql.createPool(dbConfig);
+    }
+    return pool;
+};
+
+// Inicializar (compatible con Vercel serverless)
 const initDatabase = async () => {
     try {
-        pool = mysql.createPool(dbConfig);
-        
-        // Probar la conexión
-        const connection = await pool.getConnection();
-        console.log('✅ Conectado a la base de datos MariaDB');
-        
-        // Configurar timeouts para evitar bloqueos
-        try {
-            await connection.execute('SET SESSION innodb_lock_wait_timeout = 120');
-            await connection.execute('SET SESSION lock_wait_timeout = 120');
-            await connection.execute('SET SESSION wait_timeout = 28800');
-            console.log('✅ Timeouts configurados');
-        } catch (error) {
-            console.warn('⚠️ No se pudieron configurar timeouts:', error.message);
-        }
-        
-        // Crear tabla servicios_cache si no existe
-        try {
-            await connection.execute(`
-                CREATE TABLE IF NOT EXISTS servicios_cache (
-                    id INT(11) NOT NULL AUTO_INCREMENT,
-                    service_id INT(11) NOT NULL,
-                    name TEXT NOT NULL,
-                    type VARCHAR(50) NOT NULL,
-                    category VARCHAR(100) NOT NULL,
-                    rate DECIMAL(10,4) NOT NULL,
-                    min INT(11) NOT NULL,
-                    max INT(11) NOT NULL,
-                    refill TINYINT(1) DEFAULT 0,
-                    \`cancel\` TINYINT(1) DEFAULT 0,
-                    descripcion TEXT DEFAULT NULL,
-                    activo TINYINT(1) DEFAULT 1,
-                    markup DECIMAL(5,2) DEFAULT 20.00,
-                    precio_final DECIMAL(10,4) GENERATED ALWAYS AS (rate * (1 + markup / 100)) STORED,
-                    fecha_actualizacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    PRIMARY KEY (id),
-                    UNIQUE KEY service_id (service_id),
-                    KEY idx_category (category),
-                    KEY idx_activo (activo)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            `);
-            console.log('✅ Tabla servicios_cache verificada/creada');
-        } catch (error) {
-            console.error('⚠️ Error creando tabla servicios_cache:', error.message);
-        }
-        
+        const p = getPool();
+        const connection = await p.getConnection();
+        console.log('✅ Conectado a la base de datos');
         connection.release();
-        
+        return p;
     } catch (error) {
         console.error('❌ Error conectando a la base de datos:', error.message);
         throw error;
     }
-    
-    return pool;
 };
 
 // Obtener conexión del pool
 const getConnection = () => {
-    if (!pool) {
-        throw new Error('Database pool not initialized');
-    }
-    return pool;
+    return getPool();
 };
 
 // Función para ejecutar queries

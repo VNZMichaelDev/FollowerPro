@@ -1,51 +1,35 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
-      "src": "/login.html",
-      "dest": "/public/login.html"
+      "source": "/",
+      "destination": "/public/index.html"
     },
     {
-      "src": "/register.html",
-      "dest": "/public/register.html"
+      "source": "/login.html",
+      "destination": "/public/login.html"
     },
     {
-      "src": "/dashboard.html",
-      "dest": "/public/dashboard.html"
+      "source": "/register.html",
+      "destination": "/public/register.html"
     },
     {
-      "src": "/css/(.*)",
-      "dest": "/public/css/$1"
+      "source": "/dashboard.html",
+      "destination": "/public/dashboard.html"
     },
     {
-      "src": "/js/(.*)",
-      "dest": "/public/js/$1"
-    },
-    {
-      "src": "/images/(.*)",
-      "dest": "/public/images/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/:path*",
+      "destination": "/public/:path*"
     }
   ]
 }

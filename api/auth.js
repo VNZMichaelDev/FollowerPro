@@ -25,8 +25,14 @@ module.exports = async (req, res) => {
         }
     }
 
-    // Obtener el path desde la query
-    const path = req.query.path || req.url.split('?')[0].replace('/api/auth/', '');
+    // Obtener el path desde la query o URL
+    let path = '';
+    if (req.query && req.query.path) {
+        path = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
+    } else if (req.url) {
+        const urlParts = req.url.split('?')[0].split('/');
+        path = urlParts[urlParts.length - 1] || '';
+    }
 
     // Routing basado en el path
     switch (path) {

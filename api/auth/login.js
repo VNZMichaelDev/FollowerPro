@@ -4,13 +4,29 @@ const { generateToken } = require('../../utils/jwt');
 const { success, error, validationError } = require('../../utils/apiResponse');
 
 module.exports = async (req, res) => {
+    // Configurar CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Manejar preflight
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    
     // Solo permitir POST
     if (req.method !== 'POST') {
         return error(res, 'Método no permitido', 405);
     }
 
     try {
-        const { email, password } = req.body;
+        // Parsear body si es necesario
+        let body = req.body;
+        if (typeof body === 'string') {
+            body = JSON.parse(body);
+        }
+        
+        const { email, password } = body;
 
         // Validaciones
         if (!email || !password) {

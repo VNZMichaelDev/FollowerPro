@@ -119,6 +119,10 @@ module.exports = async (req, res) => {
 // ============================================
 
 async function handleLogin(req, res, body) {
+    console.log('🔐 Intentando login...');
+    console.log('Method:', req.method);
+    console.log('Body:', body);
+    
     if (req.method !== 'POST') {
         return error(res, 'Método no permitido', 405);
     }
@@ -127,10 +131,13 @@ async function handleLogin(req, res, body) {
         const { email, password } = body;
 
         if (!email || !password) {
+            console.log('❌ Email o password faltante');
             return validationError(res, 'Email y contraseña son requeridos');
         }
 
+        console.log('📧 Buscando usuario:', email);
         const user = await User.findByEmail(email);
+        console.log('👤 Usuario encontrado:', user ? 'Sí' : 'No');
         if (!user) {
             return error(res, 'Credenciales inválidas', 401);
         }

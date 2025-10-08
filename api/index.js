@@ -25,9 +25,12 @@ module.exports = async (req, res) => {
     try {
         // Obtener la ruta desde la URL
         const url = req.url || '';
-        const path = url.split('?')[0].replace('/api/', '').replace('/api', '');
+        let path = url.split('?')[0];
         
-        console.log('📍 Ruta solicitada:', path, 'Método:', req.method);
+        // Limpiar el path
+        path = path.replace('/api/', '').replace('/api', '').replace(/^\/+/, '');
+        
+        console.log('📍 Ruta solicitada:', path, 'Método:', req.method, 'URL completa:', req.url);
 
         // Parsear body si es necesario
         let body = req.body || {};
@@ -89,10 +92,12 @@ module.exports = async (req, res) => {
         }
 
         // Ruta no encontrada
+        console.log('❌ Ruta no encontrada:', path);
         return error(res, 'Ruta no encontrada: ' + path, 404);
 
     } catch (err) {
         console.error('❌ Error en API:', err);
+        console.error('Stack:', err.stack);
         return error(res, 'Error interno del servidor: ' + err.message, 500);
     }
 };

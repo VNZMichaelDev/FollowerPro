@@ -46,6 +46,18 @@ module.exports = async (req, res) => {
         // ROUTING
         // ============================================
 
+        // TEST ROUTE
+        if (path === '' || path === 'test' || path === 'index') {
+            return res.status(200).json({
+                success: true,
+                message: 'API funcionando correctamente',
+                path: path,
+                url: req.url,
+                method: req.method,
+                timestamp: new Date().toISOString()
+            });
+        }
+
         // AUTH ROUTES
         if (path.startsWith('auth/login') || path === 'auth-login') {
             return handleLogin(req, res, body);

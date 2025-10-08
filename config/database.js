@@ -47,14 +47,16 @@ const getConnection = () => {
     return getPool();
 };
 
-// Función para ejecutar queries
+// Función para ejecutar queries (compatible con Vercel serverless)
 const query = async (sql, params = []) => {
     try {
-        const connection = getConnection();
-        const [rows] = await connection.execute(sql, params);
+        const pool = getPool();
+        const [rows] = await pool.execute(sql, params);
         return rows;
     } catch (error) {
-        console.error('Error en query:', error.message);
+        console.error('❌ Error en query:', error.message);
+        console.error('SQL:', sql);
+        console.error('Params:', params);
         throw error;
     }
 };
